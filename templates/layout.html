@@ -285,7 +285,7 @@ function update_o_SVD_HV(){
   for (var v in SVD_HV_DEP){
     HW_check=HW_check&&vars[SVD_HV_DEP[v]];
   }
-  HW_check&&(vars.i_PhysReady||vars.i_NormInj);
+  HW_check=HW_check&&(vars.i_PhysReady||vars.i_NormInj);
   if (HW_check==false) {
     vars.io_SVD_HV = false;
   }
@@ -305,7 +305,7 @@ function update_o_PXD(){
   for (var v in PXD_DEP){
     HW_check=HW_check&&vars[PXD_DEP[v]];
   }
-  HW_check&&(vars.i_PhysReady||vars.i_NormInj);
+  HW_check=HW_check&&(vars.i_PhysReady||vars.i_NormInj);
   if (HW_check==false) {
     vars.io_PXD = false;
   }
