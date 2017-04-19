@@ -23,10 +23,10 @@
       border: solid 1px black; 
       position:absolute;
     }    
-    .sc{
-      top:7%;
-      left:83%;
-      width:15%;
+    .sc0{
+      top:25%;
+      left:75%;
+      width:25%;
       position:absolute;
       float:left;
       background: #ffffff;
@@ -34,6 +34,17 @@
       font-family: Verdana, Arial, Helvetica, sans-serif; 
       font-size:50%;
     }
+    .sc{
+      top:25%;
+      left:65%;
+      width:35%;
+      position:absolute;
+      float:left;
+      background: #ffffff;
+      opacity:0.8;
+      font-family: Verdana, Arial, Helvetica, sans-serif; 
+      font-size:50%;
+    }    
     </style>  
 
 {% block head_before %} {% endblock %}
@@ -42,14 +53,12 @@ var vars = {
 i_Manual: true,
 i_BeamAbort: true,
 i_N2: true,
+i_Pressure: true,
 i_DCWF: true,
 i_SolAbn: true,
 i_EnvMon: true,
 i_Waterleak: true,
 i_EHPower: true,
-i_CO2Interlocked: true,
-i_NoCO2: true,
-i_highT: true,
 i_CO2OK: true,
 i_HS1: true,
 i_HS2: true,
@@ -386,12 +395,6 @@ function change_input(divObj){
   vars[divObj.id] = !vars[divObj.id];
   update_el_color(divObj.id);
   update_outputs();
-  if ((vars[divObj.id] == false)){
-    update_sc();  
-  }
-  if (all_io_OK()==true){
-    update_sc();   
-  }
   return;
 }
 
@@ -448,30 +451,7 @@ function get_SC3(){
   return sc.toString(16);
 }
 
-function update_sc(){
-  document.getElementById("o_SC1").innerHTML = "SC1: #"+get_SC1();
-  if (get_SC1()!="1fff"){
-    document.getElementById("o_SC1").style.background="#FF0000";
-  }
-  else{
-   document.getElementById("o_SC1").style.background="#00FF00"; 
-  }
-  document.getElementById("o_SC2").innerHTML = "SC2: #0"+get_SC2();
-  if (get_SC2()!="fff"){
-      document.getElementById("o_SC2").style.background="#FF0000";
-  }
-  else{
-    document.getElementById("o_SC2").style.background="#00FF00"; 
-  }
-  document.getElementById("o_SC3").innerHTML = "SC3: #0"+get_SC3();
-  if (get_SC3()!="3ff"){
-      document.getElementById("o_SC3").style.background="#FF0000";
-  }
-  else{
-    document.getElementById("o_SC3").style.background="#00FF00"; 
-  }
-  return;
-}
+
 function show_dependences(divObj){
   var deps = [];
   if ((divObj.id == "o_SVD_LV")||(divObj.id == "o_SVD_LV_0")||(divObj.id == "o_SVD_LV_1")||(divObj.id == "o_SVD_LV_2")){
@@ -503,11 +483,83 @@ function show_dependences(divObj){
   return;
 }
 
+// Set the date we're counting down to
+var maxDelay = 100000;
+var Delay = 0;
+var Step = 1;
+
+
+// Update the count down every 1 second
+function run_countdown(){
+ setInterval(function(){  
+    if (Delay < maxDelay) {
+      if ((vars["i_isAlive"] == false)){
+      change_input(document.getElementById("i_isAlive"));
+      }
+    }
+    Delay += Step;
+    // Display the result in the element with id="demo"
+    document.getElementById("Timer").innerHTML = Delay + "/" + maxDelay;  
+    // If the count down is finished, write some text 
+    if (Delay >= maxDelay) {
+      document.getElementById("Timer").innerHTML = "Connection lost";
+      if ((vars["i_isAlive"] == true)){
+      change_input(document.getElementById("i_isAlive"));
+      }
+    }
+  }, Step);
+}
+
+function null_timer(){
+  Delay = 0;
+}
+
+function update_input(){
+  var i_val_N2 = document.getElementById('i_var_N2').value;
+  if (i_val_N2 >= 50)
+  {
+    if ((vars["i_N2"] == false)){
+      change_input(document.getElementById("i_N2"));
+    }
+  }
+  else{
+    if ((vars["i_N2"] == true)){
+      change_input(document.getElementById("i_N2"));
+    }
+  }
+  var i_val_Pressure = document.getElementById('i_var_Pressure').value;
+  if (i_val_Pressure >= 50)
+  {
+    if ((vars["i_Pressure"] == false)){
+      change_input(document.getElementById("i_Pressure"));
+    }
+  }
+  else{
+    if ((vars["i_Pressure"] == true)){
+      change_input(document.getElementById("i_Pressure"));
+    }
+  }
+  var i_val_DCWF = document.getElementById('i_var_DCWF').value;
+  if (i_val_DCWF >= 50)
+  {
+    if ((vars["i_DCWF"] == false)){
+      change_input(document.getElementById("i_DCWF"));
+    }
+  }
+  else{
+    if ((vars["i_DCWF"] == true)){
+      change_input(document.getElementById("i_DCWF"));
+    }
+  }
+
+
+}
+
 </script>
 {% block head %} {% endblock %}
 </head>
 
-<body onload="update_all_colors();update_sc();">    
+<body onload="update_all_colors();run_countdown();">    
 <div style="left:0%;width:100%;height:10%;position:absolute;text-align:center;">
   <h1>Internal logic of Vertex Local Hardwired Interlock</h1>
 </div>
@@ -525,85 +577,70 @@ function show_dependences(divObj){
     <div style="top:0%;left:1%;width:18%;height:100%;position:absolute;float: left;">
       <div id="i_Manual" class="input" onclick="change_input(this)">
         Manual
-        <div class="sc">
-          SC#1
-          bit#0
+        <div class="sc0">
+          %MW001
         </div>
       </div>
       <div id="i_BeamAbort" class="input" onclick="change_input_twice(this);">
         Beam Abort
-        <div class="sc">
-          SC#1
-          bit#1
+        <div class="sc0">
+          %MW002
         </div>        
-      </div> 
-      <div id="i_N2" class="input" onclick="change_input(this)">
-        N2 flow
-        <div class="sc">
-          SC#1
-          bit#2
-        </div>        
-      </div>         
-      <div id="i_DCWF" class="input" onclick="change_input(this)">
-        DOCK chiller
-        <div class="sc">
-          SC#1
-          bit#3
-        </div>        
-      </div>                
-    </div>
-    <div class="group" style="top:30%;left:1%;width:18%;position:absolute;">
-      <div style="top:0%;left:0%;width:100%;height:10%;position:relative;text-align: center;">
-        <h3>CO2 Cooling plant</h3>
-      </div>
-      <div id="i_CO2Interlocked" class="input" style="opacity:0.1" onclick="change_input(this)">
-        Interlocked
-      </div>       
-      <div id="i_NoCO2" class="input" style="opacity:0.1" onclick="change_input(this)">
-        No CO2
-      </div>             
-      <div id="i_highT" class="input" style="opacity:0.1" onclick="change_input(this)">
-        T not reached
-      </div>              
+      </div>  
       <div id="i_CO2OK" class="input" onclick="change_input(this)">
-        All OK
-        <div class="sc">
-          SC#1
-          bit#4
+        CO2 OK
+        <div class="sc0">
+          %MW003
         </div>        
-      </div>   
-    </div>      
-
+      </div>    
+      <div id="i_N2" class="input">
+        N2 flow
+        <div class="sc0">
+          %MW301
+        </div>        
+        <input class="textBox" id="i_var_N2" type="range" onchange="update_input()">
+      </div> 
+      <div id="i_DCWF" class="input">
+        DOCK chiller
+        <div class="sc0">
+          %MW302
+        </div> 
+        <input class="textBox" id="i_var_DCWF" type="range" onchange="update_input()">       
+      </div> 
+      <div id="i_Pressure" class="input">
+        Pressure
+        <div class="sc0">
+          %MW303
+        </div>  
+        <input class="textBox" id="i_var_Pressure" type="range" onchange="update_input()">      
+      </div>  
+    </div>
     <div class="group" style="top:0%;left:21%;width:18%;position:absolute;">
       <div style="top:0%;left:0%;width:100%;height:10%;position:relative;text-align: center;">
-        <h3>Central Interlock</h3>
+        Central Interlock
       </div>
       <div id="i_SolAbn" class="input" onclick="change_input(this)">
-        Solenoid abnormal
-        <div class="sc">
-          SC#1
-          bit#5
+        Sol. abn.
+        <div class="sc0">
+          %MW011
         </div>   
       </div>       
       <div id="i_EnvMon" class="input" onclick="change_input(this)">
         Env. monitor
-        <div class="sc">
-          SC#1
-          bit#6
+        <div class="sc0">
+          %MW012
         </div>          
       </div>             
       <div id="i_Waterleak" class="input" onclick="change_input(this)">
         Waterleak
-        <div class="sc">
-          SC#1
-          bit#7
+        <div class="sc0">
+          %MW013
         </div>          
       </div>              
       <div id="i_EHPower" class="input" onclick="change_input(this)">
         E.H. Power
-        <div class="sc">
-          SC#1
-          bit#8
+        <div class="sc0">
+          %MW014
         </div>          
       </div>   
     </div>  
@@ -612,133 +649,153 @@ function show_dependences(divObj){
 
     <div class="group" style="top:50%;left:21%;width:18%;position:absolute;">
       <div style="top:0%;left:0%;width:100%;height:10%;position:relative;text-align: center;">
-        <h3>Humidity Sniffers</h3>
+        Humidity Sniffers
       </div>
       <div id="i_HS1" class="input" onclick="change_input(this)">
         #1
         <div class="sc">
-          SC#1
-          bit#9
+         %MW021
         </div>          
       </div>       
       <div id="i_HS2" class="input" onclick="change_input(this)">
         #2
         <div class="sc">
-          SC#1
-          bit#10
+          %MW022
         </div>          
       </div>             
       <div id="i_HS3" class="input" onclick="change_input(this)">
         #3
         <div class="sc">
-          SC#1
-          bit#11
+          %MW023
         </div>          
       </div>              
       <div id="i_HS4" class="input" onclick="change_input(this)">
         #4
         <div class="sc">
-          SC#1
-          bit#12
+          %MW024
         </div>          
       </div>   
     </div>  
 
     <div class="group" style="top:0%;left:41%;width:28%;height:60%;position:absolute;">
       <div style="top:0%;left:0%;width:100%;position:absolute;text-align: center;">
-        <h3>NTC Temperature</h3>
+        NTC Temperature
       </div>
-      <div style="top:25%;left:0%;width:48%;height:90%;position:absolute;">      
-        <div id="i_T1" class="input" onclick="change_input(this)">
-          #1
-        <div class="sc">
-          SC#2
-          bit#0
-        </div>            
-        </div>       
-        <div id="i_T2" class="input" onclick="change_input(this)">
-          #2
-        <div class="sc">
-          SC#2
-          bit#1
-        </div>           
-        </div>             
-        <div id="i_T3" class="input" onclick="change_input(this)">
-          #3
-        <div class="sc">
-          SC#2
-          bit#2
-        </div>           
-        </div>              
-        <div id="i_T4" class="input" onclick="change_input(this)">
-          #4
-        <div class="sc">
-          SC#2
-          bit#3
-        </div>           
-        </div>   
-        <div id="i_T5" class="input" onclick="change_input(this)">
-          #5
-        <div class="sc">
-          SC#2
-          bit#4
-        </div>           
-        </div>              
-        <div id="i_T6" class="input" onclick="change_input(this)">
-          #6
-        <div class="sc">
-          SC#2
-          bit#5
-        </div>           
-        </div>   
-      </div>
-      <div style="top:25%;left:49%;width:48%;height:90%;position:absolute;">      
-        <div id="i_T7" class="input" onclick="change_input(this)">
-          #7
-        <div class="sc">
-          SC#2
-          bit#6
-        </div>           
-        </div>       
-        <div id="i_T8" class="input" onclick="change_input(this)">
-          #8
-        <div class="sc">
-          SC#2
-          bit#7
-        </div>           
-        </div>             
-        <div id="i_T9" class="input" onclick="change_input(this)">
-          #9
-        <div class="sc">
-          SC#2
-          bit#8
-        </div>           
-        </div>              
-        <div id="i_T10" class="input" onclick="change_input(this)">
-          #10
-        <div class="sc">
-          SC#2
-          bit#9
-        </div>           
-        </div>   
-        <div id="i_T11" class="input" onclick="change_input(this)">
-          #11
-        <div class="sc">
-          SC#2
-          bit#10
-        </div>           
-        </div>              
-        <div id="i_T12" class="input" onclick="change_input(this)">
-          #12
-        <div class="sc">
-          SC#2
-          bit#11
-        </div>           
-        </div>     
-      </div>         
+      <div style="top:10%;left:0%;width:100%;position:absolute;text-align: center;">
+      <table style="width:100%">
+        <tr>
+          <td>   
+            <div id="i_T1" class="input" onclick="change_input(this)">
+              #1
+            <div class="sc">
+              %MW031
+            </div>            
+            </div>
+          </td>
+          <td>   
+            <div id="i_T7" class="input" onclick="change_input(this)">
+            #7
+              <div class="sc">
+              %MW041
+              </div>           
+            </div>    
+          </td>
+        </tr> 
+        <tr> 
+          <td>   
+            <div id="i_T2" class="input" onclick="change_input(this)">
+              #2
+            <div class="sc">
+              %MW032
+            </div>            
+            </div>
+          </td>
+          <td>   
+            <div id="i_T8" class="input" onclick="change_input(this)">
+            #8
+              <div class="sc">
+              %MW042
+              </div>           
+            </div>    
+          </td>
+        </tr>
+        <tr> 
+          <td>   
+            <div id="i_T3" class="input" onclick="change_input(this)">
+              #3
+            <div class="sc">
+              %MW033
+            </div>            
+            </div>
+          </td>
+          <td>   
+            <div id="i_T9" class="input" onclick="change_input(this)">
+            #9
+              <div class="sc">
+              %MW043
+              </div>           
+            </div>    
+          </td>
+        </tr> 
+        <tr> 
+          <td>   
+            <div id="i_T4" class="input" onclick="change_input(this)">
+              #4
+            <div class="sc">
+              %MW034
+            </div>            
+            </div>
+          </td>
+          <td>   
+            <div id="i_T10" class="input" onclick="change_input(this)">
+            #10
+              <div class="sc">
+              %MW044
+              </div>           
+            </div>    
+          </td>
+        </tr> 
+        <tr> 
+          <td>   
+            <div id="i_T5" class="input" onclick="change_input(this)">
+              #5
+            <div class="sc">
+              %MW035
+            </div>            
+            </div>
+          </td>
+          <td>   
+            <div id="i_T11" class="input" onclick="change_input(this)">
+            #11
+              <div class="sc">
+              %MW045
+              </div>           
+            </div>    
+          </td>
+        </tr> 
+        <tr> 
+          <td>   
+            <div id="i_T6" class="input" onclick="change_input(this)">
+              #6
+            <div class="sc">
+              %MW036
+            </div>            
+            </div>
+          </td>
+          <td>   
+            <div id="i_T12" class="input" onclick="change_input(this)">
+            #12
+              <div class="sc">
+              %MW046
+              </div>           
+            </div>    
+          </td>
+        </tr>                               
+      </table>           
+      </div> 
     </div>      
 
-    <div class="group" style="top:0%;left:71%;width:28%;height:65%;position:absolute;">
+    <div class="group" style="top:0%;left:71%;width:28%;height:70%;position:absolute;">
       <div style="top:0%;left:0%;width:100%;position:absolute;text-align: center;">
         <h3>Waterleak</h3>
       </div>
@@ -749,36 +806,31 @@ function show_dependences(divObj){
         <div id="i_WL_SD1" class="input" onclick="change_input(this)">
           #1
           <div class="sc">
-            SC#3
-            bit#0
+            %MW051
           </div>            
         </div>       
         <div id="i_WL_SD2" class="input" onclick="change_input(this)">
           #2
           <div class="sc">
-            SC#3
-            bit#1
+            %MW052
           </div>            
         </div>             
         <div id="i_WL_SD3" class="input" onclick="change_input(this)">
           #3
           <div class="sc">
-            SC#3
-            bit#2
+            %MW053
           </div>            
         </div>              
         <div id="i_WL_SD4" class="input" onclick="change_input(this)">
           #4
           <div class="sc">
-            SC#3
-            bit#3
+            %MW054
           </div>            
         </div>   
         <div id="i_WL_SD5" class="input" onclick="change_input(this)">
           #5
           <div class="sc">
-            SC#3
-            bit#4
+            %MW055
           </div>            
         </div>              
       </div>
@@ -789,36 +841,31 @@ function show_dependences(divObj){
         <div id="i_WL_WL1" class="input" onclick="change_input(this)">
           #1
           <div class="sc">
-            SC#3
-            bit#5
+            %MW061
           </div>            
         </div>       
         <div id="i_WL_WL2" class="input" onclick="change_input(this)">
           #2
           <div class="sc">
-            SC#3
-            bit#6
+            %MW062
           </div>            
         </div>             
         <div id="i_WL_WL3" class="input" onclick="change_input(this)">
           #3
           <div class="sc">
-            SC#3
-            bit#7
+            %MW063
           </div>            
         </div>              
         <div id="i_WL_WL4" class="input" onclick="change_input(this)">
           #4
           <div class="sc">
-            SC#3
-            bit#8
+            %MW064
           </div>            
         </div>   
         <div id="i_WL_WL5" class="input" onclick="change_input(this)">
           #5
           <div class="sc">
-            SC#3
-            bit#9
+            %MW065
           </div>            
         </div>                
       </div>         
@@ -841,12 +888,21 @@ function show_dependences(divObj){
       </div>
       <div id="o_SVD_LV" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #1
+        <div class="sc">
+            %MW101
+        </div> 
       </div>       
       <div id="o_SVD_LV_0" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #2
+        <div class="sc">
+            %MW102
+        </div>         
       </div>             
       <div id="o_SVD_LV_1" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #3
+        <div class="sc">
+            %MW103
+        </div>         
       </div>              
     </div>  
 
@@ -856,12 +912,21 @@ function show_dependences(divObj){
       </div>
       <div id="o_SVD_HV" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #1
+        <div class="sc">
+            %MW111
+        </div>         
       </div>       
       <div id="o_SVD_HV_0" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #2
+        <div class="sc">
+            %MW112
+        </div>         
       </div>             
       <div id="o_SVD_HV_1" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #3
+        <div class="sc">
+            %MW113
+        </div>         
       </div>              
     </div> 
 
@@ -871,21 +936,36 @@ function show_dependences(divObj){
       </div>
       <div id="o_PXD" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #1
+        <div class="sc">
+            %MW121
+        </div>         
       </div>       
       <div id="o_PXD_0" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #2
+        <div class="sc">
+            %MW122
+        </div>         
       </div>             
       <div id="o_PXD_1" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         #3
+        <div class="sc">
+            %MW123
+        </div>         
       </div>              
     </div> 
 
     <div style="top:0%;left:61%;width:18%;position:absolute;">
       <div id="o_Chiller" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         DOCK Chiller
+        <div class="sc0">
+            %MW131
+        </div>         
       </div>       
       <div id="o_CO2" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         CO2 cooling plant
+        <div class="sc0">
+            %MW132
+        </div>                 
       </div>                        
     </div> 
 
@@ -895,15 +975,27 @@ function show_dependences(divObj){
       </div>
       <div id="o_SVD_LV_2" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         SVD LV
+        <div class="sc0">
+            %MW141
+        </div>  
       </div>       
       <div id="o_SVD_HV_2" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         SVD HV
+        <div class="sc0">
+            %MW142
+        </div>          
       </div>             
       <div id="o_PXD_2" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         PXD
+        <div class="sc0">
+            %MW143
+        </div>          
       </div>              
       <div id="o_Waterleak" class="input" onmouseover="show_dependences(this)" onmouseout="update_all_colors()">
         Waterleak
+        <div class="sc0">
+            %MW144
+        </div>          
       </div>              
     </div> 
 
@@ -916,8 +1008,44 @@ function show_dependences(divObj){
     <h2>EPICS</h2>
   </div>
 
-
   <div class="group" style="top:15%;left:1%;width:98%;position:absolute;">
+    <div style="top:0%;left:0%;width:100%;height:100%;position:absolute;background:#FFFFFF;opacity:1.0;">
+    </div>      
+    <div style="top:0%;left:0%;width:100%;height:100%;position:absolute;background:#FFECAF;opacity:0.5;">
+    </div> 
+    <div style="top:0%;left:0%;width:100%;height:10%;position:relative;text-align: center;">
+      <h3>Link</h3>
+    </div>    
+    <table style="width:100%;table-layout:fixed;">    
+      <tr>   
+        <td colspan="2">  
+          <div id="i_isAlive" class="input">      
+            Is alive
+            <div class="sc0">
+              %MW203
+            </div>   
+          </div>      
+        </td>   
+      </tr>
+      <tr> 
+        <td>    
+          <div id="i_Handshake" class="input" style="background:#ffffff;" onclick="null_timer()">      
+            Ping
+            <div class="sc">
+              %MW204
+            </div>   
+          </div> 
+        </td>
+        <td>  
+          <div id="Timer"  class="input" style="background:#ffffff;width: 100px;"></div>
+        </td>
+      </tr>
+    </table>
+  </div>  
+    
+
+
+  <div class="group" style="top:35%;left:1%;width:98%;position:absolute;">
   <div style="top:0%;left:0%;width:100%;height:100%;position:absolute;background:#FFFFFF;opacity:1.0;">
   </div>      
   <div style="top:0%;left:0%;width:100%;height:100%;position:absolute;background:#FFECAF;opacity:0.5;">
@@ -927,56 +1055,57 @@ function show_dependences(divObj){
     </div>
     <div id="i_PhysReady" class="input" onclick="change_input(this)">
       Physics ready
+        <div class="sc0">
+            %MW201
+        </div> 
     </div>       
     <div id="i_NormInj" class="input" onclick="change_input(this)">
       Not in Normal Injection
-    </div>             
-    <div id="i_isAlive" class="input" onclick="change_input(this)">
-      Is alive
-    </div>              
-  </div>  
+        <div class="sc0">
+            %MW202
+        </div>       
+    </div>    
+    </div>
 
-  <div class="group" style="top:40%;left:1%;width:98%;position:absolute;">
+
+
+  <div class="group" style="top:60%;left:1%;width:98%;position:absolute;">
     <div style="top:0%;left:0%;width:100%;height:10%;position:relative;text-align: center;">
       <h3>Interlocked</h3>
     </div>
 
     <div id="io_SVD_LV" class="input" onclick="change_input(this)">
       SVD LV
+        <div class="sc">
+            %MW211
+        </div>         
     </div>       
     <div id="io_SVD_HV" class="input" onclick="change_input(this)">
       SVD HV
+        <div class="sc">
+            %MW212
+        </div>          
     </div>             
     <div id="io_PXD" class="input" onclick="change_input(this)">
       PXD
+        <div class="sc">
+            %MW213
+        </div>          
     </div>
     <div id="io_Chiller" class="input" onclick="change_input(this)">
       DOCK Chiller
+        <div class="sc">
+            %MW214
+        </div>          
     </div>                   
     <div id="io_CO2" class="input" onclick="change_input(this)">
       CO2 cooling plant
+        <div class="sc">
+            %MW215
+        </div>          
     </div>                       
   </div>  
 
-  <div class="group" style="top:75%;left:1%;width:98%;position:absolute;">
-  <div style="top:0%;left:0%;width:100%;height:100%;position:absolute;background:#FFFFFF;opacity:1.0;">
-  </div>      
-  <div style="top:0%;left:0%;width:100%;height:100%;position:absolute;background:#AFFFFD;opacity:0.5;">
-  </div>  
-    <div style="top:0%;left:0%;width:100%;height:10%;position:relative;text-align: center;">
-      <h3>Status code</h3>
-    </div>
-    <div id="o_SC1" class="input">
-        #????
-    </div>       
-    <div id="o_SC2" class="input">
-        #????
-    </div>       
-    <div id="o_SC3" class="input">
-        #????
-    </div>       
-
-  </div>    
 
 </div>
 </body>
