@@ -52,8 +52,8 @@
 var vars = {
 i_Manual: true,
 i_BeamAbort: true,
-i_N2: true,
-i_Pressure: true,
+//i_N2: true,
+//i_Pressure: true,
 i_DCWF: true,
 i_SolAbn: true,
 i_EnvMon: true,
@@ -112,7 +112,6 @@ io_CO2: true,
 };
 
 var SVD_LV_DEP = ["i_Manual",
-                  "i_N2",
                   "i_DCWF",
                   "i_SolAbn",
                   "i_EnvMon",
@@ -148,7 +147,6 @@ var SVD_LV_DEP = ["i_Manual",
 
 var SVD_HV_DEP = ["i_Manual",
                   "i_BeamAbort",
-                  "i_N2",
                   "i_DCWF",
                   "i_SolAbn",
                   "i_EnvMon",
@@ -185,7 +183,6 @@ var SVD_HV_DEP = ["i_Manual",
 
 var PXD_DEP = ["i_Manual",
                   "i_BeamAbort",
-                  "i_N2",
                   "i_SolAbn",
                   "i_EnvMon",
                   "i_Waterleak",
@@ -232,8 +229,7 @@ var Chiller_DEP =["i_DCWF",
                   "i_WL_WL4",
                   "i_WL_WL5"]
 
-var CO2_DEP = ["i_N2",
-              "i_HS1",
+var CO2_DEP = ["i_HS1",
               "i_HS2",
               "i_HS3",
               "i_HS4"]
@@ -370,7 +366,7 @@ function update_o_Waterleak(){
 function update_outputs(){
   update_o_SVD_LV();
   update_o_SVD_HV();
-  update_o_PXD();
+  //update_o_PXD();
   update_o_Chiller();
   update_o_CO2();
   update_o_Waterleak();
@@ -462,11 +458,11 @@ function show_dependences(divObj){
     deps.push("i_PhysReady");
     deps.push("i_NormInj");
   }
-  if ((divObj.id == "o_PXD")||(divObj.id == "o_PXD_0")||(divObj.id == "o_PXD_1")||(divObj.id == "o_PXD_2")){
-    deps = PXD_DEP;
-    deps.push("i_PhysReady");
-    deps.push("i_NormInj");
-  }   
+  //if ((divObj.id == "o_PXD")||(divObj.id == "o_PXD_0")||(divObj.id == "o_PXD_1")||(divObj.id == "o_PXD_2")){
+  //  deps = PXD_DEP;
+  //  deps.push("i_PhysReady");
+  //  deps.push("i_NormInj");
+  //}   
   if (divObj.id == "o_Chiller"){
     deps = Chiller_DEP;
   }
@@ -482,16 +478,29 @@ function show_dependences(divObj){
   divObj.style.background="#FF0000";
   return;
 }
-
+var maxDelay = 10000
 // Set the date we're counting down to
-var maxDelay = 100000;
+
+
+
 var Delay = 0;
 var Step = 1;
+//var maxDelay = document.getElementById('maxDelay').value();
 
+// Set the minimum value for DOCKChiller waterflow
+//var minWF = document.getElementById('minWF').value();
+ 
 
 // Update the count down every 1 second
 function run_countdown(){
- setInterval(function(){  
+//document.getElementById("maxDelay").innerHTML
+ if (document.getElementById('maxDelay').value == ''){
+   maxDelay = 100000
+ }
+ else{
+   maxDelay = document.getElementById('maxDelay').value;
+ }  
+ setInterval(function(){
     if (Delay < maxDelay) {
       if ((vars["i_isAlive"] == false)){
       change_input(document.getElementById("i_isAlive"));
@@ -514,33 +523,14 @@ function null_timer(){
   Delay = 0;
 }
 
+function update_timer(){
+  maxDelay = document.getElementById('maxDelay').value;
+}
+
 function update_input(){
-  var i_val_N2 = document.getElementById('i_var_N2').value;
-  if (i_val_N2 >= 50)
-  {
-    if ((vars["i_N2"] == false)){
-      change_input(document.getElementById("i_N2"));
-    }
-  }
-  else{
-    if ((vars["i_N2"] == true)){
-      change_input(document.getElementById("i_N2"));
-    }
-  }
-  var i_val_Pressure = document.getElementById('i_var_Pressure').value;
-  if (i_val_Pressure >= 50)
-  {
-    if ((vars["i_Pressure"] == false)){
-      change_input(document.getElementById("i_Pressure"));
-    }
-  }
-  else{
-    if ((vars["i_Pressure"] == true)){
-      change_input(document.getElementById("i_Pressure"));
-    }
-  }
   var i_val_DCWF = document.getElementById('i_var_DCWF').value;
-  if (i_val_DCWF >= 50)
+  var minWF = document.getElementById('minWF').value;
+  if (i_val_DCWF >= minWF)
   {
     if ((vars["i_DCWF"] == false)){
       change_input(document.getElementById("i_DCWF"));
@@ -593,26 +583,12 @@ function update_input(){
           %MW003
         </div>        
       </div>    
-      <div id="i_N2" class="input">
-        N2 flow
-        <div class="sc0">
-          %MW301
-        </div>        
-        <input class="textBox" id="i_var_N2" type="range" onchange="update_input()">
-      </div> 
       <div id="i_DCWF" class="input">
         DOCK chiller
         <div class="sc0">
           %MW302
         </div> 
         <input class="textBox" id="i_var_DCWF" type="range" onchange="update_input()">       
-      </div> 
-      <div id="i_Pressure" class="input">
-        Pressure
-        <div class="sc0">
-          %MW303
-        </div>  
-        <input class="textBox" id="i_var_Pressure" type="range" onchange="update_input()">      
       </div>  
     </div>
     <div class="group" style="top:0%;left:21%;width:18%;position:absolute;">
@@ -795,6 +771,19 @@ function update_input(){
       </div> 
     </div>      
 
+  <div class="group" style="top:65%;left:40%;width:30%;height:7%;position:absolute;">
+      <div style="top:0%;left:0%;width:100%;position:absolute;text-align: center;">
+        Minimum waterflow: <input id='minWF' type=number size='20'><button onclick='update_input();'></button>
+      </div>
+    </div>
+
+  <div class="group" style="top:75%;left:41%;width:28%;height:7%;position:absolute;">
+      <div style="top:0%;left:0%;width:100%;position:absolute;text-align: center;">
+        Maximum timeout: <input id='maxDelay' type=number size='20'><button onclick='null_timer();run_countdown();'></button>
+      </div>
+    </div>
+
+
     <div class="group" style="top:0%;left:71%;width:28%;height:70%;position:absolute;">
       <div style="top:0%;left:0%;width:100%;position:absolute;text-align: center;">
         <h3>Waterleak</h3>
@@ -870,7 +859,6 @@ function update_input(){
         </div>                
       </div>         
     </div>     
-
   </div>
 </div>
 
