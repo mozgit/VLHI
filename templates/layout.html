@@ -366,7 +366,7 @@ function update_o_Waterleak(){
 function update_outputs(){
   update_o_SVD_LV();
   update_o_SVD_HV();
-  //update_o_PXD();
+  update_o_PXD();
   update_o_Chiller();
   update_o_CO2();
   update_o_Waterleak();
@@ -458,11 +458,11 @@ function show_dependences(divObj){
     deps.push("i_PhysReady");
     deps.push("i_NormInj");
   }
-  //if ((divObj.id == "o_PXD")||(divObj.id == "o_PXD_0")||(divObj.id == "o_PXD_1")||(divObj.id == "o_PXD_2")){
-  //  deps = PXD_DEP;
-  //  deps.push("i_PhysReady");
-  //  deps.push("i_NormInj");
-  //}   
+  if ((divObj.id == "o_PXD")||(divObj.id == "o_PXD_0")||(divObj.id == "o_PXD_1")||(divObj.id == "o_PXD_2")){
+    deps = PXD_DEP;
+    deps.push("i_PhysReady");
+    deps.push("i_NormInj");
+  }   
   if (divObj.id == "o_Chiller"){
     deps = Chiller_DEP;
   }
