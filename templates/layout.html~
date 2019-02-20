@@ -216,7 +216,8 @@ var PXD_DEP = ["i_Manual",
                   "i_WL_WL5",
                   "i_isAlive"]
 
-var Chiller_DEP =["i_Waterleak",
+var Chiller_DEP =["i_DCWF",
+                  "i_Waterleak",
                   "i_WL_SD1",
                   "i_WL_SD2",
                   "i_WL_SD3",
